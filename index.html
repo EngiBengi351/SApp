@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- SEO / Meta -->
+  <title>Karteikarten – Lern-App</title>
+  <meta name="description" content="Moderne, responsive Karteikarten-Web-App mit Lernmodus, mehreren Decks, Dark/Light-Mode und JSON-Import/Export. Perfekt für GitHub Pages.">
+  <meta name="theme-color" content="#4f46e5">
+
+  <!-- Favicon (Inline-SVG, keine externen Dateien nötig) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%234f46e5'/><rect x='7' y='6' width='15' height='17' rx='3' fill='%23ffffff'/><rect x='11' y='10' width='15' height='17' rx='3' fill='%23a5b4fc'/></svg>">
+
+  <!-- Eigenes Stylesheet (keine externen Abhängigkeiten) -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-logo" aria-hidden="true">🃏</span>
+      <div class="brand-text">
+        <h1>Karteikarten</h1>
+        <span class="brand-sub">Lern-App</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Dark/Light-Mode Umschalter -->
+      <button id="themeToggle" class="btn btn-ghost" type="button" aria-label="Farbschema umschalten">
+        <span id="themeIcon" aria-hidden="true">🌙</span>
+        <span id="themeLabel">Dark</span>
+      </button>
+
+      <!-- Sicherung: Export -->
+      <button id="btnExport" class="btn btn-soft" type="button">⬇ Karten exportieren</button>
+
+      <!-- Sicherung: Import (öffnet versteckte Datei-Auswahl) -->
+      <button id="btnImport" class="btn btn-soft" type="button">⬆ Karten importieren</button>
+      <input type="file" id="importFile" accept="application/json,.json" hidden>
+    </div>
+  </header>
+
+  <!-- ==================== DECK-AUSWAHL ==================== -->
+  <div class="deck-bar">
+    <label class="deck-label" for="deckSelect">Deck:</label>
+    <select id="deckSelect" class="deck-select" aria-label="Aktives Deck auswählen"></select>
+
+    <div class="deck-buttons">
+      <button id="btnNewDeck" class="btn btn-primary btn-sm" type="button">＋ Neues Deck</button>
+      <button id="btnRenameDeck" class="btn btn-soft btn-sm" type="button">Umbenennen</button>
+      <button id="btnDeleteDeck" class="btn btn-soft btn-sm btn-danger-outline" type="button">Löschen</button>
+    </div>
+  </div>
+
+  <!-- ==================== TABS (Ansichtswechsel) ==================== -->
+  <nav class="tabs" role="tablist" aria-label="Ansicht wählen">
+    <button class="tab is-active" data-view="learn" role="tab" aria-selected="true" type="button">🎓 Lernen</button>
+    <button class="tab" data-view="manage" role="tab" aria-selected="false" type="button">🗂 Karten verwalten</button>
+  </nav>
+
+  <main class="app-main">
+
+    <!-- ============ ANSICHT 1: LERN-MODUS ============ -->
+    <section id="learnView" class="view" role="tabpanel">
+
+      <!-- Fortschrittsanzeige -->
+      <div class="progress-card" id="progressCard" hidden>
+        <div class="progress-head">
+          <span id="progressLabel" class="progress-label">Karte 1 von 1</span>
+          <span class="progress-stats">
+            <span class="chip chip-green" id="knownCount">✔ 0 gewusst</span>
+            <span class="chip chip-red" id="unknownCount">✘ 0 nicht gewusst</span>
+          </span>
+        </div>
+        <!-- Fortschrittsbalken -->
+        <div class="progress-track" role="progressbar" aria-label="Lernfortschritt" aria-valuemin="0" aria-valuemax="100" id="progressBar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+
+      <!-- Die Karte (3D-Flip) -->
+      <div class="card-stage" id="cardStage">
+        <button class="flip-card" id="flipCard" type="button" aria-label="Karte umdrehen">
+          <span class="flip-inner">
+            <span class="flip-face flip-front">
+              <span class="face-label">Frage</span>
+              <span class="face-text" id="frontText"></span>
+            </span>
+            <span class="flip-face flip-back">
+              <span class="face-label">Antwort</span>
+              <span class="face-text" id="backText"></span>
+            </span>
+          </span>
+        </button>
+        <p class="flip-hint" id="flipHint">Klicken oder Leertaste zum Umdrehen</p>
+      </div>
+
+      <!-- Antwort-Buttons -->
+      <div class="answer-controls" id="answerControls">
+        <button class="btn btn-danger btn-answer" id="btnUnknown" type="button">✘ Nicht gewusst <kbd>N</kbd></button>
+        <button class="btn btn-success btn-answer" id="btnKnown" type="button">✔ Gewusst <kbd>G</kbd></button>
+      </div>
+
+      <!-- Zusammenfassung nach einer Runde -->
+      <div class="summary" id="learnSummary" hidden>
+        <h2>Runde beendet 🎉</h2>
+        <div class="summary-stats">
+          <div class="summary-stat stat-green">
+            <strong id="sumKnown">0</strong>
+            <span>gewusst</span>
+          </div>
+          <div class="summary-stat stat-red">
+            <strong id="sumUnknown">0</strong>
+            <span>nicht gewusst</span>
+          </div>
+          <div class="summary-stat stat-blue">
+            <strong id="sumTotal">0</strong>
+            <span>gesamt</span>
+          </div>
+        </div>
+        <div class="summary-actions">
+          <button class="btn btn-primary" id="btnRepeatAll" type="button">Alle wiederholen</button>
+          <button class="btn btn-danger" id="btnRepeatUnknown" type="button" hidden>Nur Nicht-Gewusste</button>
+          <button class="btn btn-soft" id="btnGoManage" type="button">Karten verwalten</button>
+        </div>
+      </div>
+
+      <!-- Leerzustand (kein Deck / keine Karten) -->
+      <div class="empty-state" id="learnEmpty" hidden>
+        <span class="empty-icon" aria-hidden="true">📚</span>
+        <p id="learnEmptyText">Noch keine Karten in diesem Deck.</p>
+        <button class="btn btn-primary" id="btnEmptyToManage" type="button">Erste Karte anlegen</button>
+      </div>
+    </section>
+
+    <!-- ============ ANSICHT 2: KARTEN VERWALTEN ============ -->
+    <section id="manageView" class="view" role="tabpanel" hidden>
+
+      <!-- Formular: neue Karte hinzufügen -->
+      <form id="cardForm" class="card-form" autocomplete="off">
+        <h2>Neue Karteikarte</h2>
+
+        <label class="field">
+          <span>Vorderseite (Frage)</span>
+          <textarea id="frontInput" rows="3" maxlength="2000" placeholder="z. B. Was bedeutet HTTP?" required></textarea>
+        </label>
+
+        <label class="field">
+          <span>Rückseite (Antwort)</span>
+          <textarea id="backInput" rows="3" maxlength="2000" placeholder="z. B. Hypertext Transfer Protocol" required></textarea>
+        </label>
+
+        <button class="btn btn-primary btn-block" type="submit">＋ Karte hinzufügen</button>
+        <p class="form-note" id="formNote" hidden>Bitte zuerst ein Deck erstellen.</p>
+      </form>
+
+      <!-- Übersicht aller Karten -->
+      <div class="card-list-wrap">
+        <div class="list-head">
+          <h2>Alle Karten <span class="count-badge" id="cardCount">0</span></h2>
+          <input type="search" id="searchInput" class="search-input" placeholder="🔍 Karten durchsuchen…" aria-label="Karten durchsuchen">
+        </div>
+
+        <ul class="card-list" id="cardList"></ul>
+
+        <p class="empty-state empty-compact" id="listEmpty" hidden>Keine Karten gefunden.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="app-footer">
+    Alle Daten werden lokal in deinem Browser gespeichert (localStorage) – kein Server nötig.
+  </footer>
+
+  <!-- ==================== MODAL (Dialoge) ==================== -->
+  <div class="modal-backdrop" id="modalBackdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h2 class="modal-title" id="modalTitle"></h2>
+      <p class="modal-text" id="modalText"></p>
+      <input type="text" class="modal-input" id="modalInput" hidden>
+      <div class="modal-actions" id="modalActions"></div>
+    </div>
+  </div>
+
+  <!-- ==================== TOAST-BENACHRICHTIGUNGEN ==================== -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- JavaScript laden (defer = DOM ist bereit, wenn der Code startet) -->
+  <script src="script.js" defer></script>
+</body>
+</html>

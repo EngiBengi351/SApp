@@ -1,0 +1,31 @@
+Erstelle eine moderne, responsive Karteikarten-Web-App (Single Page Application) mit HTML, CSS und Vanilla JavaScript, die sich perfekt für das Hosting auf GitHub Pages eignet.
+
+### Hauptfunktionen:
+1. **Karteikarten-Verwaltung:**
+   - Ein Formular, um neue Karteikarten mit "Vorderseite" (Frage) und "Rückseite" (Antwort) hinzuzufügen.
+   - Eine Übersicht aller erstellten Karteikarten mit der Möglichkeit, einzelne Karten zu löschen.
+
+2. **Lern-Modus:**
+   - Zeige jeweils eine Karte im Vollansicht-Lernmodus.
+   - Klick auf die Karte dreht sie mit einer flüssigen 3D-CSS-Animation (Flip-Effekt) um.
+   - Buttons "Gewusst" (Grün) und "Nicht gewusst" (Rot), um zur nächsten Karte zu springen und den aktuellen Lernfortschritt anzuzeigen.
+
+3. **Datenspeicherung (`localStorage`):**
+   - Speichere alle Karteikarten im `localStorage` des Browsers, damit die Daten beim Neuladen der Seite erhalten bleiben.
+
+4. **Import & Export (Sicherung):**
+   - **Export:** Ein Button "Karten exportieren", der alle vorhandenen Karteikarten als `.json`-Datei herunterlädt.
+   - **Import:** Ein Button "Karten importieren", der eine `.json`-Datei hochlädt, validiert und die Karten in den `localStorage` übernimmt (ohne bestehende zu überschreiben oder mit Bestätigungsabfrage).
+
+5. **Design & UX:**
+   - Ein sauberes, modernes UI (z. B. mit Tailwind CSS via CDN oder übersichtlichem Custom CSS).
+   - Ein integrierter Dark/Light Mode Schalter.
+   - Vollständig responsive (optimiert für Smartphones und Desktop-Bildschirme).
+
+### Strukturierte Code-Ausgabe:
+Bitte liefere mir den vollständigen, funktionsfähigen Code aufgeteilt in drei Dateien:
+1. `index.html`
+2. `style.css`
+3. `script.js`
+
+Füge klare Kommentare im JavaScript-Code hinzu, damit ich verstehe, wie die Funktionen arbeiten. Und stell fragen. Bau es in desktop/SApp
