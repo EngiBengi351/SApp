@@ -1,31 +1,330 @@
-Erstelle eine moderne, responsive Karteikarten-Web-App (Single Page Application) mit HTML, CSS und Vanilla JavaScript, die sich perfekt für das Hosting auf GitHub Pages eignet.
+═══════════════════════════════════════════════════════════════════
+ KARTEIKARTEN-LERN-APP – VOLLSTÄNDIGE FUNKTIONSDOKUMENTATION
+ Datei: prompt.txt (lebende Dokumentation)
+ Stand: 20.10.2026
+ ═══════════════════════════════════════════════════════════════════
 
-### Hauptfunktionen:
-1. **Karteikarten-Verwaltung:**
-   - Ein Formular, um neue Karteikarten mit "Vorderseite" (Frage) und "Rückseite" (Antwort) hinzuzufügen.
-   - Eine Übersicht aller erstellten Karteikarten mit der Möglichkeit, einzelne Karten zu löschen.
+ ⚠️ PFLICHTREGEL: Diese Datei muss bei JEDER Änderung an der App
+ (index.html, style.css, script.js) mitgeändert werden:
+   1. Neue/geänderte Funktionen unten in den Abschnitten eintragen.
+   2. Den Eintrag im Abschnitt „Änderungsprotokoll" ergänzen
+      (Datum + was sich geändert hat).
+   3. Den „Stand" oben aktualisieren.
 
-2. **Lern-Modus:**
-   - Zeige jeweils eine Karte im Vollansicht-Lernmodus.
-   - Klick auf die Karte dreht sie mit einer flüssigen 3D-CSS-Animation (Flip-Effekt) um.
-   - Buttons "Gewusst" (Grün) und "Nicht gewusst" (Rot), um zur nächsten Karte zu springen und den aktuellen Lernfortschritt anzuzeigen.
+ ═══════════════════════════════════════════════════════════════════
+ 1. ÜBERBLICK
+ ═══════════════════════════════════════════════════════════════════
 
-3. **Datenspeicherung (`localStorage`):**
-   - Speichere alle Karteikarten im `localStorage` des Browsers, damit die Daten beim Neuladen der Seite erhalten bleiben.
+ Moderne, responsive Single-Page-Web-App zum Lernen mit Karteikarten.
+ Rein statisch (HTML/CSS/JS ohne Framework und ohne externe
+ Abhängigkeiten) → läuft direkt auf GitHub Pages, komplett offline
+ nutzbar, keine Server-Komponente.
 
-4. **Import & Export (Sicherung):**
-   - **Export:** Ein Button "Karten exportieren", der alle vorhandenen Karteikarten als `.json`-Datei herunterlädt.
-   - **Import:** Ein Button "Karten importieren", der eine `.json`-Datei hochlädt, validiert und die Karten in den `localStorage` übernimmt (ohne bestehende zu überschreiben oder mit Bestätigungsabfrage).
+ Dateien im Ordner desktop/SApp:
+   • index.html  – Struktur (Header, Deck-Leiste, 2 Tabs, Modal, Toasts)
+   • style.css   – komplettes eigenes CSS (Light/Dark, 3D-Flip, Responsive)
+   • script.js   – gesamte Logik, in 7 Abschnitten kommentiert
+   • prompt.txt  – diese Dokumentation
 
-5. **Design & UX:**
-   - Ein sauberes, modernes UI (z. B. mit Tailwind CSS via CDN oder übersichtlichem Custom CSS).
-   - Ein integrierter Dark/Light Mode Schalter.
-   - Vollständig responsive (optimiert für Smartphones und Desktop-Bildschirme).
+ ═══════════════════════════════════════════════════════════════════
+ 2. DECK-VERWALTUNG (mehrere Karten-Decks)
+ ═══════════════════════════════════════════════════════════════════
 
-### Strukturierte Code-Ausgabe:
-Bitte liefere mir den vollständigen, funktionsfähigen Code aufgeteilt in drei Dateien:
-1. `index.html`
-2. `style.css`
-3. `script.js`
+   • Mehrere Decks nebeneinander (z. B. „Biologie", „Vokabeln Englisch").
+   • Dropdown zur Auswahl des aktiven Decks, zeigt Kartenanzahl an
+     (z. B. „Biologie (24)").
+   • „＋ Neues Deck" – Dialog mit Namenseingabe (Pflichtfeld, max. 60 Zeichen).
+   • „Umbenennen" – Dialog mit vorbefülltem aktuellen Namen.
+   • „Löschen" – erst nach Bestätigungsdialog (nennt Deck-Namen und
+     Kartenanzahl), aktives Deck wird danach automatisch neu zugewiesen.
+   • Wechsel des Decks setzt die laufende Lernrunde zurück.
+   • Zustand (aktives Deck) bleibt beim Neuladen erhalten.
 
-Füge klare Kommentare im JavaScript-Code hinzu, damit ich verstehe, wie die Funktionen arbeiten. Und stell fragen. Bau es in desktop/SApp
+ ═══════════════════════════════════════════════════════════════════
+ 3. KARTEN-VERWALTUNG (Tab „🗂 Karten verwalten")
+ ═══════════════════════════════════════════════════════════════════
+
+   • Formular mit „Vorderseite (Frage)" und „Rückseite (Antwort)"
+     (Textareas, beide Pflicht, je max. 2000 Zeichen, Leerzeichen am
+     Rand werden automatisch entfernt).
+   • „＋ Karte hinzufügen" speichert in das aktive Deck; Formular leert
+     sich danach automatisch und der Fokus springt zurück auf die Frage.
+   • Validierung: bei leerer Eingabe erscheint eine Fehler-Meldung.
+   • Übersicht aller Karten des aktiven Decks (Vorderseite + Rückseite,
+     beschriftet) mit Lösch-Button (✕) pro Karte.
+   • Löschen nur nach Bestätigungsdialog (zeigt die Frage der Karte).
+   • Live-Suche: filtert über Vorder- UND Rückseite, Groß/klein egal,
+     zeigt „Keine Treffer für …" bei 0 Treffern.
+   • Zähler-Badge mit Gesamtzahl der Karten.
+   • Liste scrollt (max. Höhe), auf Mobil untereinander.
+   • Ohne Deck ist das Formular deaktiviert mit Hinweis-Text.
+
+ ═══════════════════════════════════════════════════════════════════
+ 4. LERN-MODUS (Tab „🎓 Lernen")
+ ═══════════════════════════════════════════════════════════════════
+
+   • Karte in Großansicht, Klick (oder Leertaste) dreht sie mit einer
+     flüssigen 3D-CSS-Flip-Animation (rotateY, preserve-3d, 0,65 s,
+     Vorderseite „Frage" / Rückseite „Antwort" mit farblich getrennten Labels).
+   • Jede Runde startet in zufälliger Reihenfolge (Fisher-Yates-Mischung).
+   • Buttons „✘ Nicht gewusst" (rot) und „✔ Gewusst" (grün),
+     je mit Tastaturkürzel-Hinweis (kbd).
+   • Fortschrittsanzeige: Balken (Prozent) + Text „Karte x von y"
+     + Chips „✔ n gewusst" / „✘ n nicht gewusst".
+   • Fortschrittsbalken hat ARIA-Attribute (role=progressbar).
+   • Runden-Ende: Zusammenfassung mit großen Zahlen
+     (gewusst / nicht gewusst / gesamt) und Buttons:
+       – „Alle wiederholen" (neu mischen)
+       – „Nur Nicht-Gewusste (n)" – nur sichtbar, wenn es welche gibt,
+         wiederholt gezielt die falsch beantworteten Karten
+       – „Karten verwalten" (wechselt den Tab)
+   • Abschluss-Toast mit Prozentwert (grün ab ≥ 70 %).
+   • Karten, die man WÄHREND einer Runde hinzufügt, kommen ans
+     Runden-Ende (Fortschritt bleibt erhalten).
+   • Gelöschte Karten werden sofort aus der laufenden Runde gestrichen
+     (Position wird korrekt nachgezogen).
+   • Leere Zustände: „Kein Deck vorhanden" (mit Button zum Anlegen)
+     vs. „Noch keine Karten in diesem Deck".
+   • Automatischer Runden-Start, wenn man den Tab betritt.
+
+ ═══════════════════════════════════════════════════════════════════
+ 5. TASTATUR-KÜRZEL
+ ═══════════════════════════════════════════════════════════════════
+
+   • Leertaste ......... Karte umdrehen
+   • G ................ Gewusst (nächste Karte)
+   • N ................ Nicht gewusst (nächste Karte)
+   • ESC ............... Dialog (Modal) schließen
+   • ENTER ............. Dialog mit Eingabefeld bestätigen
+   (Kürzel werden ignoriert, solange man in einem Eingabefeld tippt
+    oder ein Dialog offen ist.)
+
+ ═══════════════════════════════════════════════════════════════════
+ 6. DATENSPEICHERUNG (localStorage)
+ ═══════════════════════════════════════════════════════════════════
+
+   • Alle Decks + Karten + aktives Deck liegen als JSON unter dem
+     Schlüssel „karteikarten_app_v1" im localStorage des Browsers –
+     Daten bleiben also beim Neuladen erhalten, 100 % offline.
+   • Farbschema liegt unter „karteikarten_theme".
+   • Beim Laden werden defekte Einträge automatisch „repariert"
+     (ungültige Decks/Karten werden verworfen, IDs fehlertolerant ergänzt).
+   • Bei Speicher-Fehler (z. B. Speicher voll) erscheint eine Fehler-Meldung.
+   • Beim allerersten Besuch wird ein Beispiel-Deck „Beispiele" mit
+     3 Musterkarten angelegt (kann gelöscht werden).
+
+ ═══════════════════════════════════════════════════════════════════
+ 7. IMPORT & EXPORT (JSON-Sicherung)
+ ═══════════════════════════════════════════════════════════════════
+
+ EXPORT – „⬇ Karten exportieren":
+   • Lädt alle Decks inkl. Metadaten (app, version, exportedAt) als
+     Datei „karteikarten-backup-JJJJ-MM-TT.json" herunter.
+   • Ohne Karten: Hinweis-Meldung statt leerer Datei.
+
+ IMPORT – „⬆ Karten importieren":
+   • Öffnet die Dateiauswahl (nur .json / application/json).
+   • Datei wird gelesen, geparst und validiert; klare Fehler-Meldungen bei
+     unlesbarer Datei, ungültigem JSON oder ohne gültige Karten.
+   • Format-Erkennung akzeptiert: { decks: [...] }, ein einzelnes Deck
+     ({ name, cards }) oder ein reines Karten-Array.
+   • Ungültige Einträge (fehlende/leere Vorder- oder Rückseite) werden
+     übersprungen und in der Meldung gezählt.
+   • Dialog mit drei Wahlmöglichkeiten:
+       1. „Alles ersetzen" – alle aktuellen Daten werden überschrieben.
+       2. „Anhängen" (Standard) – bestehende Daten bleiben erhalten;
+          Decks mit gleichem Namen (Groß/klein egal) werden zusammen-
+          geführt, sonst entsteht ein neues Deck.
+       3. „Abbrechen" – nichts wird verändert.
+   • DUPLIKATE WERDEN BEWUSST BEHALTEN – beim Anhängen wird nichts
+     gefiltert, identische Karten kommen einfach dazu.
+   • Beim Import werden immer frische IDs erzeugt (keine Kollisionen).
+   • Danach: aktives Deck neu wählen, Lernrunde zurücksetzen,
+     Erfolgs-Meldung (Anzahl importierter Karten), Zurück zur Lernansicht.
+   • Dieselbe Datei kann direkt erneut gewählt werden (Feld wird
+     nach jedem Versuch geleert).
+
+ ═══════════════════════════════════════════════════════════════════
+ 8. DESIGN & UX
+ ═══════════════════════════════════════════════════════════════════
+
+   • Eigenes Custom CSS (kein Tailwind/Bootstrap, keine CDN-Abhängigkeit),
+     aufgeräumtes, modernes UI mit Karten, Radien, Schatten und Verläufen.
+   • Dark/Light-Mode-Schalter im Header (🌙 Dark / ☀️ Light):
+     – Umschalten sofort, Einstellung wird gespeichert,
+     – beim ersten Besuch wird die System-Einstellung
+       (prefers-color-scheme) übernommen.
+   • Vollständig responsive – Breakpoints bei 860 px (Verwaltung wird
+     einspaltig) und 640 px (Header/Leiste bricht um, Buttons stapeln
+     sich, Karte wird kompakter – optimiert für Daumen-Nutzung).
+   • Animationen: Ansichts-Wechsel (Fade-in), Toast-Einblendung,
+     Fortschrittsbalken, 3D-Karten-Drehung.
+   • prefers-reduced-motion: Animationen werden für Nutzer mit
+     System-Einstellung „Bewegung reduzieren" abgeschaltet.
+   • Barrierefreiheit: aria-labels, role=tab/tabpanel, aria-live für
+     Meldungen, sichtbarer Fokus-Ring (focus-visible), semantische Buttons.
+   • Sicherheit: Karten-Inhalte werden ausschließlich per textContent
+     eingefügt (kein innerHTML) → geschützt gegen XSS aus importierten
+     Dateien.
+   • Wiederverwendbarer Dialog (showModal) mit Titel, Text, optionalem
+     Eingabefeld und beliebigen Buttons; Abbruch per ESC oder Klick
+     neben das Fenster.
+   • Toast-Benachrichtigungen unten mittig (Erfolg = grün, Fehler = rot).
+   • Eigene Inline-SVG-Favicon (keine extra Datei nötig).
+
+ ═══════════════════════════════════════════════════════════════════
+ 9. TECHNISCHE KENNDATEN
+ ═══════════════════════════════════════════════════════════════════
+
+   • Kein Build-Schritt, keine externen Bibliotheken oder Fonts.
+   • script.js lädt mit `defer` → DOM ist bereit, wenn der Code startet.
+   • localStorage-Schlüssel: „karteikarten_app_v1" (Daten),
+     „karteikarten_theme" (Farbschema).
+   • Datenmodell:
+       state = { decks: [ { id, name, cards: [ { id, front, back } ] } ],
+                 activeDeckId }
+   • Code-Prüfung bestanden: node --check (Syntax) und alle 50 im
+     JavaScript referenzierten Element-IDs existieren im HTML.
+   • GitHub Pages: Ordner als Repo hochladen → Settings → Pages →
+     Branch „main" / Root → läuft unter <name>.github.io/<repo>/.
+
+ ═══════════════════════════════════════════════════════════════════
+ 10. JSON-FORMAT – SO FUNKTIONIERT ES
+ ═══════════════════════════════════════════════════════════════════
+
+ Die App speichert und tauscht alle Daten im Format JSON
+ (JavaScript Object Notation): eine reine Textdatei, menschenlesbar,
+ von jeder Programmiersprache lesbar. Aufbau von außen nach innen:
+ Ebene 1 = ganze Datei, Ebene 2 = Decks, Ebene 3 = Karten.
+
+ --- 10.1 Aufbau einer Export-Datei ---
+
+ {
+   "app": "karteikarten",
+   "version": 1,
+   "exportedAt": "2026-10-20T14:30:00.000Z",
+   "decks": [
+     {
+       "id": "m1a2b3c4d5",
+       "name": "Biologie",
+       "cards": [
+         {
+           "id": "x9y8z7w6",
+           "front": "Was ist die Fotosynthese?",
+           "back": "Aufbau von Glucose aus Licht, CO₂ und Wasser."
+         },
+         {
+           "id": "q1r2s3t4",
+           "front": "Was ist die Zellteilung?",
+           "back": "Mitose bzw. Meiose."
+         }
+       ]
+     },
+     {
+       "id": "u5v6w7x8",
+       "name": "Vokabeln Englisch",
+       "cards": [
+         { "id": "y1z2a3b4", "front": "the library", "back": "die Bibliothek" }
+       ]
+     }
+   ]
+ }
+
+ Bedeutung Feld für Feld:
+   • app ............ Name der App (Kennung, wird beim Import ignoriert)
+   • version ........ Format-Version der Datei (wird ignoriert)
+   • exportedAt ..... Erstellungszeitpunkt im ISO-8601-Format
+                      JJJJ-MM-TTThh:mm:ss.mmmZ (wird ignoriert)
+   • decks .......... Liste (Array) aller Decks – das eigentliche Datenpaket
+   •   id ........... eindeutige Kennung eines Decks (wird beim Import
+                      IMMER neu vergeben – nie übernommen)
+   •   name .......... Deck-Name als Text, max. 60 Zeichen
+   •   cards ........ Liste der Karten in diesem Deck
+   •     id ......... eindeutige Kennung der Karte (ebenfalls immer neu)
+   •     front ....... Vorderseite = Frage (Text)
+   •     back ........ Rückseite = Antwort (Text)
+
+ Kurz-Schema in Platzhalter-Schreibweise:
+   { "app": Text, "version": Zahl, "exportedAt": Zeitstempel,
+     "decks": [ { "id": Text, "name": Text,
+                  "cards": [ { "id": Text, "front": Text, "back": Text } ] } ] }
+
+ --- 10.2 Diese vier Formate akzeptiert der Import ---
+
+   Format A – Export-Datei (wie oben, mit "decks")          ✔ Standardfall
+   Format B – ein einzelnes Deck:
+              { "name": "Test", "cards": [ { "front": …, "back": … } ] }
+   Format C – Array von Decks:
+              [ { "name": "A", "cards": […] }, { "name": "B", "cards": […] } ]
+   Format D – reines Karten-Array:
+              [ { "front": "Frage?", "back": "Antwort." }, … ]
+              → wird automatisch in ein Deck „Importiertes Deck" gepackt
+
+ Erkennungsreihenfolge:
+   • Datei ist ein ARRAY → enthält das erste Element ein "cards"? Dann
+     sind es Decks (Format C). Enthält es "front"? Dann sind es Karten
+     (Format D).
+   • Datei ist ein OBJEKT → gibt es "decks"? Dann Format A.
+     Gibt es "cards"? Dann Format B.
+   • Sonst: Fehlermeldung „Keine gültigen Karten in der Datei gefunden."
+
+ --- 10.3 Validierungsregeln beim Import ---
+
+   • Eine Karte ist nur gültig, wenn "front" UND "back" als Texte
+     vorhanden und nicht leer sind (Leerzeichen am Rand werden
+     vorher entfernt). Alles andere wird übersprungen und in der
+     Meldung als „n ungültige Einträge übersprungen" gezählt.
+   • Ein Deck-Name muss Text sein; fehlt er, heißt es bei mehreren
+     Decks „Import 1", „Import 2" …, bei einem einzelnen Deck
+     „Importiertes Deck". Namen werden auf 60 Zeichen gekürzt.
+   • IDs (id) werden beim Import NIE übernommen, sondern frisch
+     erzeugt → keine Kollisionen mit vorhandenen Daten, auch nicht
+     bei doppeltem Import derselben Datei.
+   • app / version / exportedAt sind reine Info-Felder und werden
+     ignoriert – fremdes JSON darf sie also weglassen oder ändern.
+   • Datei ist kein gültiges JSON (Tippfehler, falsche Datei) →
+     Fehlermeldung, es passiert nichts.
+   • Datei enthält 0 gültige Karten → Fehlermeldung, es passiert nichts.
+   • Datei wird als UTF-8 gelesen (Umlaute wie ä/ö/ü/ß funktionieren).
+   • Duplikate werden NICHT gefiltert – identische Karten dürfen
+     mehrfach vorkommen und werden beim Anhängen einfach mit übernommen.
+   • „Alles ersetzen" tauscht den kompletten Datenbestand aus,
+     „Anhängen" führt Decks mit gleichem Namen zusammen (Groß/klein
+     egal) und legt unbekannte Namen als neue Decks an.
+
+ --- 10.4 Mindestbeispiele zum Selbst-Testen ---
+
+   Einfachste gültige Datei (1 Karte):
+     [ { "front": "Frage?", "back": "Antwort." } ]
+
+   Mit eigenem Deck-Namen:
+     { "decks": [ { "name": "Test", "cards": [
+         { "front": "Frage?", "back": "Antwort." } ] } ] }
+
+   Mehrere Decks auf einmal (Format C):
+     [ { "name": "Mathe", "cards": [ { "front": "2+2?", "back": "4" } ] },
+       { "name": "Geo",  "cards": [ { "front": "Hauptstadt von Frankreich?", "back": "Paris" } ] } ]
+
+ --- 10.5 Merksatz ---
+
+   Export = vollständige Sicherung (alle Decks + Karten + Metadaten).
+   Import = flexibel beim Eingangsformat (4 Varianten), streng bei der
+   Prüfung, immer mit frischen IDs – und Duplikate bleiben erhalten.
+
+ ═══════════════════════════════════════════════════════════════════
+ 11. ÄNDERUNGSPROTOKOLL
+ ═══════════════════════════════════════════════════════════════════
+
+ [20.10.2026] Erstellt: komplette App (index.html, style.css, script.js)
+              mit Deck-Verwaltung, Kartenverwaltung, Lernmodus inkl.
+              3D-Flip/Rundenstatistik, localStorage, JSON-Import/Export
+              mit Ersetzen/Anhängen-Dialog (Duplikate bleiben),
+              Dark/Light-Mode, Responsive-Layout, Tastaturkürzeln,
+              Toasts/Modals und Beispieldaten. prompt.txt als
+              Funktionsdokumentation angelegt.
+
+[20.10.2026] prompt.txt: Abschnitt „10. JSON-FORMAT" ergänzt (Export-
+              Aufbau, 4 Import-Formate, Validierungsregeln, Mindest-
+              beispiele); Änderungsprotokoll zu Abschnitt 11 umbenannt.
+
+ (Nächster Eintrag hier einfügen, wenn sich etwas an der App ändert.)
